@@ -36,16 +36,45 @@ TestLib.prototype.getResponse= function(url)
 
 
 
-TestLib.prototype.checkstatus= function(response)
+TestLib.prototype.getBody = function(url){
+
+    describe('testing for url to be equal to ' + url,function(){
+
+        it('url test',function(){
+
+            var response = chakram.get(url);
+
+            return    response.then(function(response){
+
+                console.log("response body "+JSON.stringify(response.body));
+            })
+
+
+            });
+
+
+    });
+
+}
+
+
+TestLib.prototype.checkstatus= function(url,code)
 {
     describe('check status  ',function(){
 
         it('status 200 ok ? :',function(){
 
+            var response = chakram.get(url);
 
+            return response.then(function(response){
+
+                expect(response).to.have.status(code);
+            });
 
 //can not use this.response here in it coz it will return undefined;
-            return  expect(response).to.have.status(200);
+            //console.log(response.statusText);
+
+
         });
     });
 
@@ -215,5 +244,64 @@ TestLib.prototype.DeleteReq=function(url){
 
 }
 
+
+TestLib.prototype.StatusRange = function(response,low,high)
+{
+    describe('staus of url ',function(){
+
+       it('status range using add asertion method',function(){
+
+           chakram.addMethod("statusRange", function (respObj, low, high) {
+               var inRange = respObj.response.statusCode >= low && respObj.response.statusCode <= high;
+               this.assert(inRange, 'expected '+respObj.response.statusCode+' to be between '+low+' and '+high, 'expected '+respObj.response.statusCode+' not to be between '+low+' and '+high);
+           });
+
+
+           return expect(response).to.have.statusRange(low,high);
+
+
+           chakram.wait();
+       }) ;
+
+
+
+    });
+
+
+
+TestLib.prototype.jsonpresent = function(response,attr){
+
+    describe('checking for attribute: '+JSON.stringify(attr),function(){
+       it('checking..',function(){
+
+           chakram.addMethod('checkjson',function(resquestobj,Jattri){
+
+
+              this.assert(expect(response).to.comprise.of.json(Jattri),'expected json object','dosent match');
+
+
+           });
+
+           expect(response).to.have.checkjson(attr);
+
+        return chakram.wait();
+       }) ;
+
+
+
+
+    });
+}
+
+
+
+
+
+
+
+
+
+
+}
 
 module.exports = TestLib;
